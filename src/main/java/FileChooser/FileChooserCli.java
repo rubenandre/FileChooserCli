@@ -29,7 +29,7 @@ public class FileChooserCli {
         fileFilter = fileTypeFilterFabric.makeFileFilter(filter);
     }
 
-    public void show() {
+    public String show() {
         int selectedOption = -1;
         File selectedFile = currentPath.getAbsoluteFile();
         while (!(selectedFile.isFile())) {
@@ -46,7 +46,7 @@ public class FileChooserCli {
             selectedOption = -1;
             walk(selectedFile);
         }
-        System.out.println(selectedFile);
+        return selectedFile.getAbsolutePath();
     }
 
     private void walk(File selectedFile) {
