@@ -15,13 +15,10 @@ public class FileChooserCli {
     private Scanner scanner;
     private List<File> actualPathFiles;
 
-    public FileChooserCli(final String basePath) throws FileNotFoundException {
+    public FileChooserCli(final String basePath) {
         this.basePath = new File(basePath).getAbsoluteFile();
         this.currentPath = this.basePath;
         this.scanner = new Scanner(System.in);
-        if (!this.basePath.exists() || !this.currentPath.exists()) {
-            throw new FileNotFoundException("File does not exist");
-        }
     }
 
     public void useFilter(String filter) {
@@ -32,19 +29,19 @@ public class FileChooserCli {
     public String show() {
         int selectedOption = -1;
         File selectedFile = currentPath.getAbsoluteFile();
-        while (!(selectedFile.isFile())) {
+        while (selectedFile.isDirectory() || selectedOption == -1) {
             listFilesActualPath();
-            System.out.print("Select a file: ");
-            while (selectedOption == -1){
-                try {
-                    selectedOption = scanner.nextInt();
-                    selectedFile = actualPathFiles.get(selectedOption);
-                } catch (NumberFormatException | ArrayIndexOutOfBoundsException ex) {
-                    selectedOption = -1;
-                }
+            System.out.print("Select an option: ");
+            try {
+                selectedOption = scanner.nextInt();
+                selectedFile = actualPathFiles.get(selectedOption);
+            } catch (InputMismatchException ex) {
+                scanner.nextLine();
+                continue;
+            } catch (IndexOutOfBoundsException ignored) {
+                continue;
             }
-            selectedOption = -1;
-            walk(selectedFile);
+            if (selectedFile.isDirectory()) walk(selectedFile);
         }
         return selectedFile.getAbsolutePath();
     }
@@ -52,7 +49,9 @@ public class FileChooserCli {
     private void walk(File selectedFile) {
         if (selectedFile.isDirectory()) {
             if (selectedFile.getName().equals("..")) {
-                currentPath = currentPath.getParentFile();
+                if (currentPath.getParentFile() != null) {
+                    currentPath = currentPath.getParentFile();
+                }
             }
             else {
                 currentPath = selectedFile.getAbsoluteFile();
